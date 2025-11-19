@@ -16,7 +16,11 @@ import '../utils/responsive_helper.dart';
 ///
 /// This is a static preview screen with placeholder functionality.
 class MoreScreen extends StatelessWidget {
-  const MoreScreen({super.key});
+  const MoreScreen({super.key, this.embedInParent = false});
+
+  /// When true, return only inner content so this widget can be embedded
+  /// inside a parent that supplies global navigation.
+  final bool embedInParent;
 
   // Design constants
   static const Color _primaryBlue = Color(0xFF0D79FF);
@@ -29,50 +33,54 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar
-            _buildTopBar(context),
+    final bodyContent = SafeArea(
+      child: Column(
+        children: [
+          // Top Bar
+          _buildTopBar(context),
 
-            // Scrollable Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: ResponsiveHelper.getHorizontalPadding(context),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        height: ResponsiveHelper.getVerticalPadding(context)),
+          // Scrollable Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveHelper.getHorizontalPadding(context),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                      height: ResponsiveHelper.getVerticalPadding(context)),
 
-                    // Doctor & Support Section
-                    _buildDoctorSupportSection(context),
+                  // Doctor & Support Section
+                  _buildDoctorSupportSection(context),
 
-                    SizedBox(
-                        height: ResponsiveHelper.getSectionSpacing(context)),
+                  SizedBox(height: ResponsiveHelper.getSectionSpacing(context)),
 
-                    // Community Section
-                    _buildCommunitySection(context),
+                  // Community Section
+                  _buildCommunitySection(context),
 
-                    SizedBox(
-                        height: ResponsiveHelper.getSectionSpacing(context)),
+                  SizedBox(height: ResponsiveHelper.getSectionSpacing(context)),
 
-                    // Settings & Account Section
-                    _buildSettingsSection(context),
+                  // Settings & Account Section
+                  _buildSettingsSection(context),
 
-                    SizedBox(
-                        height: ResponsiveHelper.getVerticalPadding(context)),
-                  ],
-                ),
+                  SizedBox(
+                      height: ResponsiveHelper.getVerticalPadding(context)),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+
+    if (embedInParent) {
+      return bodyContent;
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: bodyContent,
     );
   }
 

@@ -12,21 +12,20 @@ import 'screens/add_vitals_screen.dart';
 import 'screens/book_appointment_screen.dart';
 import 'screens/data_permissions_screen.dart';
 import 'screens/doctor_directory_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/initial_screen.dart';
 import 'screens/log_symptoms_screen.dart';
 import 'screens/medical_history_screen.dart';
-import 'screens/more_screen.dart';
 import 'screens/my_pregnancy_screen.dart';
 import 'screens/new_reminder_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/personal_info_screen.dart';
-import 'screens/pregnancy_dashboard_screen.dart';
-import 'screens/reminders_screen.dart';
 import 'screens/settings_account_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/sign_up_screen.dart';
-import 'screens/track_vitals_screen.dart';
+// Note: `More`, `Reminders`, and `Track` are now available via `HomeScreen`.
+// Screens are still present for standalone use but are not imported here.
 import 'screens/user_details_screen.dart';
 import 'services/notification_service.dart';
 
@@ -85,13 +84,13 @@ class PregnancyDashboardApp extends StatelessWidget {
           '/sign-in': (context) => const SignInScreen(),
           '/sign-up': (context) => const SignUpScreen(),
           '/user-details': (context) => const UserDetailsScreen(),
-          '/dashboard': (context) => const PregnancyDashboardScreen(),
+          '/dashboard': (context) => const HomeScreen(),
           '/add-vitals': (context) => const AddVitalsScreen(),
-          '/track': (context) => const TrackVitalsScreen(),
+          '/track': (context) => const HomeScreen(initialIndex: 1),
           '/log-symptoms': (context) => const LogSymptomsScreen(),
-          '/reminders': (context) => const RemindersScreen(),
+          '/reminders': (context) => const HomeScreen(initialIndex: 2),
           '/newReminder': (context) => const NewReminderScreen(),
-          '/more': (context) => const MoreScreen(),
+          '/more': (context) => const HomeScreen(initialIndex: 3),
           '/settings': (context) => const SettingsScreen(),
           '/settings-account': (context) => const SettingsAccountScreen(),
           '/personal-info': (context) => const PersonalInfoScreen(),
