@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/doctor_provider.dart';
+import 'package:provider/provider.dart';
+
 import '../providers/appointments_provider.dart';
+import '../providers/doctor_provider.dart';
 import '../utils/responsive_helper.dart';
 
 /// More Screen - Doctor & Support, Community, and Settings
@@ -45,22 +46,26 @@ class MoreScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: ResponsiveHelper.getVerticalPadding(context)),
+                    SizedBox(
+                        height: ResponsiveHelper.getVerticalPadding(context)),
 
                     // Doctor & Support Section
                     _buildDoctorSupportSection(context),
 
-                    SizedBox(height: ResponsiveHelper.getSectionSpacing(context)),
+                    SizedBox(
+                        height: ResponsiveHelper.getSectionSpacing(context)),
 
                     // Community Section
                     _buildCommunitySection(context),
 
-                    SizedBox(height: ResponsiveHelper.getSectionSpacing(context)),
+                    SizedBox(
+                        height: ResponsiveHelper.getSectionSpacing(context)),
 
                     // Settings & Account Section
                     _buildSettingsSection(context),
 
-                    SizedBox(height: ResponsiveHelper.getVerticalPadding(context)),
+                    SizedBox(
+                        height: ResponsiveHelper.getVerticalPadding(context)),
                   ],
                 ),
               ),
@@ -147,11 +152,13 @@ class MoreScreen extends StatelessWidget {
             doctorIdsWithAppointments.add(appointment.doctorId);
             final doctor = doctorProvider.getDoctorById(appointment.doctorId);
             if (doctor != null) {
-              final dateStr = DateFormat('MMM d, h:mm a').format(appointment.dateTime);
+              final dateStr =
+                  DateFormat('MMM d, h:mm a').format(appointment.dateTime);
               doctorsToShow.add({
                 'name': doctor.name,
                 'subtitle': 'Upcoming: $dateStr',
-                'avatarPath': doctor.avatarAsset ?? 'assets/images/doctor_placeholder.png',
+                'avatarPath':
+                    doctor.avatarAsset ?? 'images/doctor_placeholder.png',
                 'semanticLabel': 'Appointment with ${doctor.name} on $dateStr',
                 'hasAppointment': true,
                 'appointmentId': appointment.id,
@@ -166,9 +173,12 @@ class MoreScreen extends StatelessWidget {
           if (!doctorIdsWithAppointments.contains(doctor.id)) {
             doctorsToShow.add({
               'name': doctor.name,
-              'subtitle': '${doctor.specialty}${doctor.location != null ? ", ${doctor.location}" : ""}',
-              'avatarPath': doctor.avatarAsset ?? 'assets/images/doctor_placeholder.png',
-              'semanticLabel': '${doctor.name}, ${doctor.specialty}${doctor.location != null ? " in ${doctor.location}" : ""}',
+              'subtitle':
+                  '${doctor.specialty}${doctor.location != null ? ", ${doctor.location}" : ""}',
+              'avatarPath':
+                  doctor.avatarAsset ?? 'images/doctor_placeholder.png',
+              'semanticLabel':
+                  '${doctor.name}, ${doctor.specialty}${doctor.location != null ? " in ${doctor.location}" : ""}',
               'hasAppointment': false,
             });
           }
@@ -197,7 +207,8 @@ class MoreScreen extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: doctorsToShow.length,
-                separatorBuilder: (context, index) => SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
+                separatorBuilder: (context, index) =>
+                    SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
                 itemBuilder: (context, index) {
                   final doctorData = doctorsToShow[index];
                   final hasAppointment = doctorData['hasAppointment'] as bool;
@@ -211,10 +222,13 @@ class MoreScreen extends StatelessWidget {
                     hasDeleteButton: hasAppointment,
                     onDelete: hasAppointment
                         ? () async {
-                            final appointmentId = doctorData['appointmentId'] as String;
-                            final confirmed = await _showDeleteConfirmDialog(context);
+                            final appointmentId =
+                                doctorData['appointmentId'] as String;
+                            final confirmed =
+                                await _showDeleteConfirmDialog(context);
                             if (confirmed == true) {
-                              await appointmentsProvider.deleteAppointment(appointmentId);
+                              await appointmentsProvider
+                                  .deleteAppointment(appointmentId);
                             }
                           }
                         : null,
@@ -403,10 +417,9 @@ class MoreScreen extends StatelessWidget {
         _buildCommunityCard(
           context: context,
           name: 'Sophia Bennett',
-          message:
-              'I\'m 12 weeks pregnant and experiencing nausea. Any tips?',
+          message: 'I\'m 12 weeks pregnant and experiencing nausea. Any tips?',
           timestamp: '2d ago',
-          avatarPath: 'assets/images/female_avatar1.png',
+          avatarPath: 'images/female_avatar1.png',
         ),
 
         SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
@@ -415,10 +428,9 @@ class MoreScreen extends StatelessWidget {
         _buildCommunityCard(
           context: context,
           name: 'Olivia Hayes',
-          message:
-              'Has anyone tried prenatal yoga? What are the benefits?',
+          message: 'Has anyone tried prenatal yoga? What are the benefits?',
           timestamp: '3d ago',
-          avatarPath: 'assets/images/female_avatar2.png',
+          avatarPath: 'images/female_avatar2.png',
         ),
 
         const SizedBox(height: 20),
@@ -472,11 +484,11 @@ class MoreScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  size: 28,
-                  color: Color(0xFFCCD5DE),
-                ),
+                // child: const Icon(
+                //   Icons.person,
+                //   size: 28,
+                //   color: Color(0xFFCCD5DE),
+                // ),
               ),
 
               const SizedBox(width: 12),

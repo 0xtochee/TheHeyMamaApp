@@ -10,26 +10,25 @@ import 'providers/symptoms_provider.dart';
 import 'providers/vitals_provider.dart';
 import 'screens/add_vitals_screen.dart';
 import 'screens/book_appointment_screen.dart';
+import 'screens/data_permissions_screen.dart';
 import 'screens/doctor_directory_screen.dart';
 import 'screens/initial_screen.dart';
 import 'screens/log_symptoms_screen.dart';
 import 'screens/medical_history_screen.dart';
 import 'screens/more_screen.dart';
+import 'screens/my_pregnancy_screen.dart';
 import 'screens/new_reminder_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/personal_info_screen.dart';
 import 'screens/pregnancy_dashboard_screen.dart';
 import 'screens/reminders_screen.dart';
-import 'screens/settings_screen.dart';
 import 'screens/settings_account_screen.dart';
-import 'screens/personal_info_screen.dart';
-import 'screens/my_pregnancy_screen.dart';
-import 'screens/data_permissions_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/track_vitals_screen.dart';
 import 'screens/user_details_screen.dart';
 import 'services/notification_service.dart';
-import 'utils/dev_utils.dart';
 
 /// Main entry point for the Pregnancy Dashboard application
 ///
@@ -43,7 +42,7 @@ void main() async {
 
   // DEVELOPMENT ONLY: Clear all data for testing
   // Comment out this line to preserve user data between app restarts
-  await DevUtils.clearAllData();
+  // await DevUtils.clearAllData();
 
   // Initialize notification service (includes timezone initialization)
   await NotificationService().initialize();
@@ -158,7 +157,7 @@ class PregnancyDashboardApp extends StatelessWidget {
       ),
 
       // Card theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: cardColor,
         elevation: 2,
         shape: RoundedRectangleBorder(
