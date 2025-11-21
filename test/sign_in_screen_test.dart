@@ -44,7 +44,8 @@ class MockAuthService implements AuthService {
     return AuthResult(
       success: shouldSucceed,
       token: shouldSucceed ? 'mock_google_token' : null,
-      message: shouldSucceed ? 'Google sign in successful' : 'Google sign in failed',
+      message:
+          shouldSucceed ? 'Google sign in successful' : 'Google sign in failed',
     );
   }
 
@@ -56,7 +57,8 @@ class MockAuthService implements AuthService {
     return AuthResult(
       success: shouldSucceed,
       token: shouldSucceed ? 'mock_apple_token' : null,
-      message: shouldSucceed ? 'Apple sign in successful' : 'Apple sign in failed',
+      message:
+          shouldSucceed ? 'Apple sign in successful' : 'Apple sign in failed',
     );
   }
 
@@ -72,6 +74,19 @@ class MockAuthService implements AuthService {
   bool isValidPassword(String password) {
     return password.length >= 6;
   }
+
+  @override
+  Future<void> clearAllUsers() {
+    // TODO: implement clearAllUsers
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AuthResult> signUp(
+      {required String name, required String email, required String password}) {
+    // TODO: implement signUp
+    throw UnimplementedError();
+  }
 }
 
 void main() {
@@ -82,7 +97,8 @@ void main() {
       mockAuthService = MockAuthService();
     });
 
-    testWidgets('renders all UI elements correctly', (WidgetTester tester) async {
+    testWidgets('renders all UI elements correctly',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SignInScreen(authService: mockAuthService),
@@ -118,7 +134,8 @@ void main() {
       expect(find.byIcon(Icons.apple), findsOneWidget);
     });
 
-    testWidgets('shows validation errors for empty fields', (WidgetTester tester) async {
+    testWidgets('shows validation errors for empty fields',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SignInScreen(authService: mockAuthService),
@@ -134,7 +151,8 @@ void main() {
       expect(find.text('Please enter your password'), findsOneWidget);
     });
 
-    testWidgets('shows validation error for invalid email', (WidgetTester tester) async {
+    testWidgets('shows validation error for invalid email',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SignInScreen(authService: mockAuthService),
@@ -161,7 +179,8 @@ void main() {
       expect(find.text('Please enter a valid email address'), findsOneWidget);
     });
 
-    testWidgets('shows validation error for short password', (WidgetTester tester) async {
+    testWidgets('shows validation error for short password',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SignInScreen(authService: mockAuthService),
@@ -185,10 +204,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify password validation error
-      expect(find.text('Password must be at least 6 characters'), findsOneWidget);
+      expect(
+          find.text('Password must be at least 6 characters'), findsOneWidget);
     });
 
-    testWidgets('calls AuthService.signInWithEmail when valid form is submitted',
+    testWidgets(
+        'calls AuthService.signInWithEmail when valid form is submitted',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -225,7 +246,8 @@ void main() {
       expect(mockAuthService.lastPassword, 'password123');
     });
 
-    testWidgets('successfully signs in with valid credentials', (WidgetTester tester) async {
+    testWidgets('successfully signs in with valid credentials',
+        (WidgetTester tester) async {
       mockAuthService.shouldSucceed = true;
 
       await tester.pumpWidget(
@@ -256,7 +278,8 @@ void main() {
       expect(mockAuthService.signInCalled, isTrue);
     });
 
-    testWidgets('shows error message on failed sign-in', (WidgetTester tester) async {
+    testWidgets('shows error message on failed sign-in',
+        (WidgetTester tester) async {
       mockAuthService.shouldSucceed = false;
 
       await tester.pumpWidget(
@@ -327,7 +350,8 @@ void main() {
       );
 
       // Find password field
-      final passwordField = find.widgetWithText(TextFormField, 'Enter your password').first;
+      final passwordField =
+          find.widgetWithText(TextFormField, 'Enter your password').first;
 
       // Enter password
       await tester.enterText(passwordField, 'testpassword');

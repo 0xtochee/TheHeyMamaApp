@@ -31,6 +31,7 @@ dependencies:
 
   # Utilities
   intl: ^0.19.0
+  url_launcher: ^6.2.2
 
 dev_dependencies:
   flutter_test:
@@ -49,3 +50,14 @@ flutter:
     - assets/images/sign-in-logo.png
     - assets/images/my_preg_img.png
     - assets/images/tip_for_img.png
+    - assets/images/map.png
+    - assets/images/clinic_1.png
+    - assets/images/clinic_2.png
+    - assets/images/clinic_3.png
+    - assets/images/clinic_inside_1.png
+    - assets/images/clinic_inside_2.png
+    - assets/images/clinic_inside_3.png
+    - assets/images/doctor_placeholder.png
+    - assets/images/female_avatar1.png
+    - assets/images/female_avatar2.png
+    - assets/images/female_doctor.png

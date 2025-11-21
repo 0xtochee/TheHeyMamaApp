@@ -58,30 +58,25 @@ class ReminderTile extends StatelessWidget {
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          height: 72,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFFF5F6F7),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFFF1F4F6),
-              width: 1,
-            ),
           ),
           child: Row(
             children: [
               // Leading icon container
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F4F6),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   reminder.icon,
                   color: const Color(0xFF7F97AA),
-                  size: 24,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 12),
@@ -95,80 +90,38 @@ class ReminderTile extends StatelessWidget {
                     Text(
                       reminder.title,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
                         color: Color(0xFF2B3B4A),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          reminder.formattedTime,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF7F97AA),
-                          ),
-                        ),
-                        if (reminder.recurring != RecurringPattern.none) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE3F2FD),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              reminder.recurring.displayName,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF0D79FF),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                    Text(
+                      _formatTimeOnly(reminder.dateTime),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF7F97AA),
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              // Status icon (check or clock)
+              // Status/Action icon
               GestureDetector(
-                onTap: onToggleComplete,
+                onTap: onToggleComplete ?? onTap,
                 child: Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    transitionBuilder: (child, animation) {
-                      return ScaleTransition(
-                        scale: animation,
-                        child: child,
-                      );
-                    },
-                    child: reminder.isCompleted
-                        ? const Icon(
-                            Icons.check_circle,
-                            key: ValueKey('completed'),
-                            color: Color(0xFF0D79FF),
-                            size: 28,
-                            semanticLabel: 'Completed',
-                          )
-                        : const Icon(
-                            Icons.radio_button_unchecked,
-                            key: ValueKey('pending'),
-                            color: Color(0xFF7F97AA),
-                            size: 28,
-                            semanticLabel: 'Pending',
-                          ),
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    reminder.isCompleted
+                        ? Icons.check_circle
+                        : Icons.access_time,
+                    color: reminder.isCompleted
+                        ? const Color(0xFF4CAF50)
+                        : const Color(0xFF7F97AA),
+                    size: 24,
                   ),
                 ),
               ),
@@ -177,6 +130,15 @@ class ReminderTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Format time only (e.g., "8:00 AM")
+  String _formatTimeOnly(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
   Future<bool?> _showDeleteDialog(BuildContext context) async {

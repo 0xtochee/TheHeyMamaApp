@@ -17,7 +17,11 @@ import 'add_vitals_screen.dart';
 /// - Quick log floating button
 /// - Bottom navigation bar
 class TrackVitalsScreen extends StatefulWidget {
-  const TrackVitalsScreen({super.key});
+  const TrackVitalsScreen({super.key, this.embedInParent = false});
+
+  /// When true, return only the inner content (no Scaffold, no FAB,
+  /// no bottom navigation) so it can be embedded in a parent container.
+  final bool embedInParent;
 
   @override
   State<TrackVitalsScreen> createState() => _TrackVitalsScreenState();
@@ -63,22 +67,29 @@ class _TrackVitalsScreenState extends State<TrackVitalsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final bodyContent = Column(
+      children: [
+        _buildAppBar(),
+        _buildTabBar(),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: _metrics.map((metric) {
+              return _buildMetricView(metric);
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+
+    if (widget.embedInParent) {
+      return SafeArea(child: bodyContent);
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          _buildTabBar(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: _metrics.map((metric) {
-                return _buildMetricView(metric);
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
+      body: bodyContent,
       floatingActionButton: _buildQuickLogButton(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -147,8 +158,10 @@ class _TrackVitalsScreenState extends State<TrackVitalsScreen>
         // Only show data if this metric is the currently selected one
         final isActiveMetric = provider.selectedMetric == metric;
         final currentValue = isActiveMetric ? provider.getCurrentValue() : null;
-        final trendPercentage = isActiveMetric ? provider.getTrendPercentage() : null;
-        final chartData = isActiveMetric ? provider.chartData : <TimeSeriesPoint>[];
+        final trendPercentage =
+            isActiveMetric ? provider.getTrendPercentage() : null;
+        final chartData =
+            isActiveMetric ? provider.chartData : <TimeSeriesPoint>[];
 
         // Format current value
         String formattedValue;

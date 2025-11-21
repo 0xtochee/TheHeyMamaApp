@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+
 import '../providers/vitals_provider.dart';
-import '../widgets/vital_card.dart';
+import '../utils/responsive_helper.dart';
 import '../widgets/alert_card.dart';
 import '../widgets/daily_tip_card.dart';
-import '../utils/responsive_helper.dart';
+import '../widgets/vital_card.dart';
+import 'educational_tips_screen.dart';
+import 'emergency_screen.dart';
+import 'find_clinics_screen.dart';
 
 /// Main dashboard screen for pregnancy monitoring
 ///
@@ -17,7 +21,12 @@ import '../utils/responsive_helper.dart';
 /// - Bottom navigation bar
 /// - Floating action button for logging vitals
 class PregnancyDashboardScreen extends StatefulWidget {
-  const PregnancyDashboardScreen({super.key});
+  const PregnancyDashboardScreen({super.key, this.embedInParent = false});
+
+  /// When true, the widget will return only its inner body (no Scaffold,
+  /// no bottom navigation). This allows embedding inside a parent that
+  /// provides persistent navigation (e.g. `HomeScreen`).
+  final bool embedInParent;
 
   @override
   State<PregnancyDashboardScreen> createState() =>
@@ -38,47 +47,57 @@ class _PregnancyDashboardScreenState extends State<PregnancyDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bodyContent = SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Responsive breakpoint for tablet/desktop
+          final isLargeScreen = !ResponsiveHelper.isMobile(context);
+
+          return Stack(
+            children: [
+              // Main scrollable content
+              SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: ResponsiveHelper.getHorizontalPadding(context),
+                  vertical: ResponsiveHelper.getVerticalPadding(context),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 24),
+                    _buildVitalsSummary(isLargeScreen),
+                    const SizedBox(height: 24),
+                    _buildLocalLanguageSection(),
+                    const SizedBox(height: 24),
+                    _buildEmergencyResourcesSection(),
+                    const SizedBox(height: 24),
+                    _buildAlertsSection(),
+                    const SizedBox(height: 24),
+                    _buildDailyTipSection(),
+                    const SizedBox(height: 24),
+                    // Log Vital Button in normal flow (not floating)
+                    _buildLogVitalButton(),
+                    const SizedBox(height: 16),
+                    // Log Symptoms Button
+                    _buildLogSymptomsButton(),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (widget.embedInParent) {
+      return bodyContent;
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Responsive breakpoint for tablet/desktop
-            final isLargeScreen = !ResponsiveHelper.isMobile(context);
-
-            return Stack(
-              children: [
-                // Main scrollable content
-                SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: ResponsiveHelper.getHorizontalPadding(context),
-                    vertical: ResponsiveHelper.getVerticalPadding(context),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 24),
-                      _buildVitalsSummary(isLargeScreen),
-                      const SizedBox(height: 24),
-                      _buildAlertsSection(),
-                      const SizedBox(height: 24),
-                      _buildDailyTipSection(),
-                      const SizedBox(height: 24),
-                      // Log Vital Button in normal flow (not floating)
-                      _buildLogVitalButton(),
-                      const SizedBox(height: 16),
-                      // Log Symptoms Button
-                      _buildLogSymptomsButton(),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+      body: bodyContent,
       bottomNavigationBar: _buildBottomNavigation(),
     );
   }
@@ -129,93 +148,374 @@ class _PregnancyDashboardScreenState extends State<PregnancyDashboardScreen> {
             Text(
               'Vital Summary',
               style: GoogleFonts.inter(
-                fontSize: ResponsiveHelper.getTitleFontSize(context),
-                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
                 color: const Color(0xFF1A2332),
               ),
             ),
-            SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
-            LayoutBuilder(
-              builder: (context, vitalConstraints) {
-                // Calculate responsive card height based on screen
-                final cardHeight =
-                    ResponsiveHelper.isMobile(context) ? 180.0 : 220.0;
-                final spacing = ResponsiveHelper.getItemSpacing(context);
-
-                // On large screens or when width allows, show cards side by side
-                if (isLargeScreen || vitalConstraints.maxWidth > 400) {
-                  return SizedBox(
-                    height: cardHeight,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: VitalCard(
-                            iconPath: 'assets/images/blood_pressure.png',
-                            value: '$bpValue mmHg',
-                            label: 'Blood Pressure',
-                            gradientColors: const [
-                              Color(0xFFE3F2FD),
-                              Color(0xFF90CAF9)
-                            ],
-                            onTap: () =>
-                                _navigateToVitalDetail('blood_pressure'),
-                          ),
-                        ),
-                        SizedBox(width: spacing),
-                        Expanded(
-                          child: VitalCard(
-                            iconPath: 'assets/images/heart_rate.png',
-                            value: '$hrValue bpm',
-                            label: 'Heart Rate',
-                            gradientColors: const [
-                              Color(0xFFFCE4EC),
-                              Color(0xFFF8BBD0)
-                            ],
-                            onTap: () => _navigateToVitalDetail('heart_rate'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  // On smaller screens, stack vertically
-                  return Column(
-                    children: [
-                      SizedBox(
-                        height: cardHeight,
-                        child: VitalCard(
-                          iconPath: 'assets/images/blood_pressure.png',
-                          value: '$bpValue mmHg',
-                          label: 'Blood Pressure',
-                          gradientColors: const [
-                            Color(0xFFE3F2FD),
-                            Color(0xFF90CAF9)
-                          ],
-                          onTap: () => _navigateToVitalDetail('blood_pressure'),
-                        ),
-                      ),
-                      SizedBox(height: spacing),
-                      SizedBox(
-                        height: cardHeight,
-                        child: VitalCard(
-                          iconPath: 'assets/images/heart_rate.png',
-                          value: '$hrValue bpm',
-                          label: 'Heart Rate',
-                          gradientColors: const [
-                            Color(0xFFFCE4EC),
-                            Color(0xFFF8BBD0)
-                          ],
-                          onTap: () => _navigateToVitalDetail('heart_rate'),
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              },
+            const SizedBox(height: 16),
+            // Cards in a row
+            Row(
+              children: [
+                Expanded(
+                  child: _buildVitalCard(
+                    value: bpValue == '--' ? bpValue : '$bpValue mmHg',
+                    label: 'Blood Pressure',
+                    imagePath: 'assets/images/blood_pressure.png',
+                    onTap: () => _navigateToVitalDetail('blood_pressure'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildVitalCard(
+                    value: hrValue == '--' ? hrValue : '$hrValue bpm',
+                    label: 'Heart Rate',
+                    imagePath: 'assets/images/heart_rate.png',
+                    onTap: () => _navigateToVitalDetail('heart_rate'),
+                  ),
+                ),
+              ],
             ),
           ],
         );
       },
+    );
+  }
+
+  /// Build individual vital card with background image
+  Widget _buildVitalCard({
+    required String value,
+    required String label,
+    required String imagePath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 180,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2C2C),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Background image
+              Positioned.fill(
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Fallback to solid color if image fails
+                    return Container(
+                      color: const Color(0xFF2C2C2C),
+                    );
+                  },
+                ),
+              ),
+              // Dark overlay for better text readability
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withOpacity(0.7),
+                        Colors.black.withOpacity(0.3),
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                ),
+              ),
+              // Text content
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      value,
+                      style: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      label,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build Local Language Education section
+  Widget _buildLocalLanguageSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section heading
+        Text(
+          'Local Language Module',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1A2332),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Card
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const EducationalTipsScreen(),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF667EEA).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.school_outlined,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Text content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Local Language Education',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Learn about pregnancy health, preeclampsia warning signs, and care practices in your native language.',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: Colors.white.withOpacity(0.9),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Core badge on the right
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF66BB6A),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Core',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build Emergency Resources section
+  Widget _buildEmergencyResourcesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section heading
+        Text(
+          'Emergency Resources',
+          style: GoogleFonts.inter(
+            fontSize: ResponsiveHelper.getTitleFontSize(context),
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF1A2332),
+          ),
+        ),
+        SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
+
+        // Nearby Clinics Card
+        _buildEmergencyCard(
+          title: 'Nearby Clinics',
+          description:
+              'Access safe, nearby clinics whenever you need medical attention or urgent maternity care.',
+          imagePath: 'assets/images/clinic_1.png',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FindClinicsScreen(),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+
+        // Emergency Contacts Card
+        _buildEmergencyCard(
+          title: 'Emergency Contacts',
+          description:
+              'Instantly connect with the people who can help you most in an emergency.',
+          imagePath: 'assets/images/female_doctor.png',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const EmergencyScreen(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  /// Build individual emergency resource card
+  Widget _buildEmergencyCard({
+    required String title,
+    required String description,
+    required String imagePath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFF1F4F6),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Text content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF2B3B4A),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF7F97AA),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Image
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

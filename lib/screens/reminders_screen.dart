@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/reminder.dart';
 import '../providers/reminders_provider.dart';
 import '../widgets/reminder_tile.dart';
@@ -14,7 +15,10 @@ import 'add_edit_reminder_screen.dart';
 /// - Edit/delete functionality per reminder
 /// - Toggle completion status
 class RemindersScreen extends StatefulWidget {
-  const RemindersScreen({super.key});
+  const RemindersScreen({super.key, this.embedInParent = false});
+
+  /// When true, returns only the inner content without Scaffold or FAB.
+  final bool embedInParent;
 
   @override
   State<RemindersScreen> createState() => _RemindersScreenState();
@@ -32,96 +36,99 @@ class _RemindersScreenState extends State<RemindersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bodyContent = SafeArea(
+      child: Column(
+        children: [
+          // Custom app bar
+          _buildAppBar(context),
+
+          // Reminders list
+          Expanded(
+            child: Consumer<RemindersProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0D79FF),
+                      ),
+                    ),
+                  );
+                }
+
+                if (provider.error != null) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Color(0xFFE53935),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Error loading reminders',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Text(
+                            provider.error!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {
+                            provider.clearError();
+                            provider.fetchReminders();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0D79FF),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: const Text(
+                            'Retry',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return _buildRemindersList(provider);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Always show with FAB (for both embedded and standalone)
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Custom app bar
-            _buildAppBar(context),
-
-            // Reminders list
-            Expanded(
-              child: Consumer<RemindersProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Color(0xFF0D79FF),
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (provider.error != null) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            size: 48,
-                            color: Color(0xFFE53935),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error loading reminders',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[800],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 40),
-                            child: Text(
-                              provider.error!,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () {
-                              provider.clearError();
-                              provider.fetchReminders();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0D79FF),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                            ),
-                            child: const Text(
-                              'Retry',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return _buildRemindersList(provider);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: bodyContent,
       // Floating Add button
       floatingActionButton: _buildFloatingActionButton(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -179,6 +186,16 @@ class _RemindersScreenState extends State<RemindersScreen> {
     final appointmentReminders =
         provider.remindersByType(ReminderType.appointment);
 
+    // Get today's tasks (incomplete reminders for today)
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final todayEnd = todayStart.add(const Duration(days: 1));
+
+    final allReminders = [...medicationReminders, ...appointmentReminders];
+    final todayTasks = allReminders.where((r) {
+      return r.dateTime.isAfter(todayStart) && r.dateTime.isBefore(todayEnd);
+    }).toList()..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+
     // Check if any reminders exist
     if (medicationReminders.isEmpty && appointmentReminders.isEmpty) {
       return _buildEmptyState();
@@ -191,26 +208,33 @@ class _RemindersScreenState extends State<RemindersScreen> {
         children: [
           const SizedBox(height: 8),
 
-          // Medication section
-          if (medicationReminders.isNotEmpty) ...[
-            _buildSectionHeader('Medication'),
+          // Today's Health Tasks section
+          if (todayTasks.isNotEmpty) ...[
+            _buildSectionHeader('Today\'s Health Tasks'),
             const SizedBox(height: 12),
+            _buildTodayTasksCard(todayTasks, provider),
+            const SizedBox(height: 24),
+          ],
+
+          // Medication section
+          _buildSectionHeader('Medication'),
+          const SizedBox(height: 12),
+          if (medicationReminders.isNotEmpty) ...[
             ...medicationReminders.map(
               (reminder) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildReminderTile(reminder, provider),
               ),
             ),
-            const SizedBox(height: 16),
           ] else
             _buildEmptySection('Medication'),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
 
           // Appointment section
+          _buildSectionHeader('Appointment'),
+          const SizedBox(height: 12),
           if (appointmentReminders.isNotEmpty) ...[
-            _buildSectionHeader('Appointment'),
-            const SizedBox(height: 12),
             ...appointmentReminders.map(
               (reminder) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -225,6 +249,144 @@ class _RemindersScreenState extends State<RemindersScreen> {
         ],
       ),
     );
+  }
+
+  /// Build today's tasks card
+  Widget _buildTodayTasksCard(List<Reminder> tasks, RemindersProvider provider) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFF1F4F6),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: tasks.asMap().entries.map((entry) {
+          final index = entry.key;
+          final reminder = entry.value;
+          return Column(
+            children: [
+              if (index > 0) const SizedBox(height: 12),
+              _buildTodayTaskItem(reminder, provider),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  /// Build individual today's task item
+  Widget _buildTodayTaskItem(Reminder reminder, RemindersProvider provider) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: reminder.isCompleted
+            ? const Color(0xFFF5F6F7)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          // Completion checkbox
+          GestureDetector(
+            onTap: () => provider.toggleComplete(reminder.id),
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: reminder.isCompleted
+                    ? const Color(0xFF4CAF50)
+                    : Colors.transparent,
+                border: Border.all(
+                  color: reminder.isCompleted
+                      ? const Color(0xFF4CAF50)
+                      : const Color(0xFFBDBDBD),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: reminder.isCompleted
+                  ? const Icon(
+                      Icons.check,
+                      size: 16,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Title and time
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  reminder.title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: reminder.isCompleted
+                        ? const Color(0xFF7F97AA)
+                        : const Color(0xFF2B3B4A),
+                    decoration: reminder.isCompleted
+                        ? TextDecoration.lineThrough
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 14,
+                      color: const Color(0xFF7F97AA),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatTimeOnly(reminder.dateTime),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF7F97AA),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Action icon (edit or health-related icon)
+          GestureDetector(
+            onTap: () => _navigateToEditReminder(reminder),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                reminder.type == ReminderType.medication
+                    ? Icons.edit_outlined
+                    : reminder.type == ReminderType.appointment
+                        ? Icons.calendar_today_outlined
+                        : Icons.edit_outlined,
+                size: 20,
+                color: const Color(0xFF0D79FF),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Format time only (e.g., "8:00 AM")
+  String _formatTimeOnly(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
   /// Build section header

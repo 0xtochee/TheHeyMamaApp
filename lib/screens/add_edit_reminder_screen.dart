@@ -35,6 +35,7 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
   late TimeOfDay _selectedTime;
   RecurringPattern _selectedRecurring = RecurringPattern.none;
   bool _isLoading = false;
+  bool _notificationsEnabled = true;
 
   @override
   void initState() {
@@ -85,12 +86,16 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
                     children: [
                       const SizedBox(height: 24),
 
+                      // Type selector (Reminder Type)
+                      _buildLabel('Reminder Type'),
+                      const SizedBox(height: 12),
+                      _buildTypeSelector(),
+                      const SizedBox(height: 24),
+
                       // Title field
-                      _buildLabel('Title'),
-                      const SizedBox(height: 8),
                       _buildTextField(
                         controller: _titleController,
-                        hintText: 'Enter reminder title',
+                        hintText: 'Title',
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Title is required';
@@ -98,55 +103,18 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
                           return null;
                         },
                       ),
+                      const SizedBox(height: 16),
+
+                      // Time selector
+                      _buildTimeField(),
+                      const SizedBox(height: 16),
+
+                      // Frequency selector
+                      _buildFrequencyField(),
                       const SizedBox(height: 24),
 
-                      // Type selector
-                      _buildLabel('Type'),
-                      const SizedBox(height: 8),
-                      _buildTypeSelector(),
-                      const SizedBox(height: 24),
-
-                      // Date and Time
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel('Date'),
-                                const SizedBox(height: 8),
-                                _buildDateSelector(),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel('Time'),
-                                const SizedBox(height: 8),
-                                _buildTimeSelector(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Recurring pattern
-                      _buildLabel('Repeat'),
-                      const SizedBox(height: 8),
-                      _buildRecurringSelector(),
-                      const SizedBox(height: 24),
-
-                      // Notes field
-                      _buildLabel('Notes (Optional)'),
-                      const SizedBox(height: 8),
-                      _buildTextArea(
-                        controller: _notesController,
-                        hintText: 'Add additional notes',
-                      ),
+                      // Notifications toggle
+                      _buildNotificationsToggle(),
                       const SizedBox(height: 32),
 
                       // Save button
@@ -169,19 +137,19 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          // Back button
+          // Close button (X icon)
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: Container(
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F6F7),
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
-                Icons.arrow_back_ios_new,
-                size: 18,
+                Icons.close,
+                size: 24,
                 color: Color(0xFF2B3B4A),
               ),
             ),
@@ -190,7 +158,7 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
           // Title
           Expanded(
             child: Text(
-              isEditing ? 'Edit Reminder' : 'Add Reminder',
+              isEditing ? 'Edit Reminder' : 'New Reminder',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 20,
@@ -281,39 +249,178 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
     );
   }
 
-  /// Build type selector (Medication/Appointment/Other)
+  /// Build type selector (Medication/Appointment/Custom)
   Widget _buildTypeSelector() {
+    // Map "Other" to "Custom" for display
+    final types = [ReminderType.medication, ReminderType.appointment, ReminderType.other];
+    final typeLabels = ['Medication', 'Appointment', 'Custom'];
+
     return Row(
-      children: ReminderType.values.map((type) {
+      children: List.generate(types.length, (index) {
+        final type = types[index];
+        final label = typeLabels[index];
         final isSelected = _selectedType == type;
+
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: index < types.length - 1 ? 8 : 0),
             child: GestureDetector(
               onTap: () => setState(() => _selectedType = type),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF0D79FF)
-                      : const Color(0xFFF5F6F7),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF0D79FF)
+                        : const Color(0xFFE0E0E0),
+                    width: isSelected ? 2 : 1,
+                  ),
                 ),
                 child: Text(
-                  type.displayName,
+                  label,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: isSelected ? Colors.white : const Color(0xFF7F97AA),
+                    color: isSelected
+                        ? const Color(0xFF0D79FF)
+                        : const Color(0xFF7F97AA),
                   ),
                 ),
               ),
             ),
           ),
         );
-      }).toList(),
+      }),
     );
+  }
+
+  /// Build time field
+  Widget _buildTimeField() {
+    final timeText = _formatTime(_selectedTime);
+
+    return GestureDetector(
+      onTap: _selectTime,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFFE0E0E0),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                timeText.isEmpty ? 'Time' : timeText,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: timeText.isEmpty
+                      ? const Color(0xFF7F97AA)
+                      : const Color(0xFF2B3B4A),
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.access_time,
+              size: 20,
+              color: Color(0xFF7F97AA),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build frequency field
+  Widget _buildFrequencyField() {
+    final frequencyText = _selectedRecurring.displayName;
+    final hasSelection = _selectedRecurring != RecurringPattern.none;
+
+    return GestureDetector(
+      onTap: _showFrequencyPicker,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFFE0E0E0),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                hasSelection ? frequencyText : 'Frequency',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: hasSelection
+                      ? const Color(0xFF2B3B4A)
+                      : const Color(0xFF7F97AA),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build notifications toggle
+  Widget _buildNotificationsToggle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Notifications',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF2B3B4A),
+          ),
+        ),
+        Switch(
+          value: _notificationsEnabled,
+          onChanged: (value) {
+            setState(() => _notificationsEnabled = value);
+          },
+          activeColor: const Color(0xFF0D79FF),
+        ),
+      ],
+    );
+  }
+
+  /// Show frequency picker
+  Future<void> _showFrequencyPicker() async {
+    final selected = await showModalBottomSheet<RecurringPattern>(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: RecurringPattern.values.map((pattern) {
+              return ListTile(
+                title: Text(pattern.displayName),
+                onTap: () => Navigator.pop(context, pattern),
+                selected: _selectedRecurring == pattern,
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() => _selectedRecurring = selected);
+    }
   }
 
   /// Build date selector
@@ -424,14 +531,14 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
   Widget _buildSaveButton(bool isEditing) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 54,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveReminder,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF0D79FF),
           disabledBackgroundColor: const Color(0xFF7F97AA),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(27),
           ),
           elevation: 0,
         ),
@@ -444,11 +551,11 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : Text(
-                isEditing ? 'Update Reminder' : 'Save Reminder',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+            : const Text(
+                'Save',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/doctor.dart';
 
 /// Provider for managing doctors directory
@@ -18,16 +19,25 @@ class DoctorProvider extends ChangeNotifier {
         name: 'Dr. Amelia Harper',
         specialty: 'Obstetrician-Gynecologist',
         location: 'San Francisco',
-        avatarAsset: 'assets/images/female_doctor.png',
+        avatarAsset: 'images/female_doctor.png',
         phone: '+1 (415) 555-0101',
         email: 'amelia.harper@hospital.com',
+      ),
+      const Doctor(
+        id: 'doc_5',
+        name: 'Dr. Ethan Carter',
+        specialty: 'Gynecologist',
+        location: 'Oakland',
+        avatarAsset: 'images/doctor_placeholder.png',
+        phone: '+1 (510) 555-0105',
+        email: 'ethan.carter@hospital.com',
       ),
       const Doctor(
         id: 'doc_2',
         name: 'Dr. Sophia Bennett',
         specialty: 'Obstetrician-Gynecologist',
         location: 'Oakland',
-        avatarAsset: 'assets/images/doctor_sophia.png',
+        avatarAsset: 'images/female_doctor.png',
         phone: '+1 (510) 555-0102',
         email: 'sophia.bennett@hospital.com',
       ),
@@ -36,7 +46,7 @@ class DoctorProvider extends ChangeNotifier {
         name: 'Dr. Olivia Martinez',
         specialty: 'Obstetrician-Gynecologist',
         location: 'Berkeley',
-        avatarAsset: 'assets/images/doctor_olivia.png',
+        avatarAsset: 'images/female_doctor.png',
         phone: '+1 (510) 555-0103',
         email: 'olivia.martinez@hospital.com',
       ),
@@ -45,18 +55,9 @@ class DoctorProvider extends ChangeNotifier {
         name: 'Dr. Isabella Rodriguez',
         specialty: 'Obstetrician-Gynecologist',
         location: 'San Jose',
-        avatarAsset: 'assets/images/doctor_isabella.png',
+        avatarAsset: 'images/female_doctor.png',
         phone: '+1 (408) 555-0104',
         email: 'isabella.rodriguez@hospital.com',
-      ),
-      const Doctor(
-        id: 'doc_5',
-        name: 'Dr. Ethan Carter',
-        specialty: 'Gynecologist',
-        location: 'Oakland',
-        avatarAsset: 'assets/images/male_doctor.png',
-        phone: '+1 (510) 555-0105',
-        email: 'ethan.carter@hospital.com',
       ),
     ];
     notifyListeners();
