@@ -158,7 +158,7 @@ class PregnancyDashboardApp extends StatelessWidget {
       ),
 
       // Card theme
-      cardTheme: const CardTheme(
+      cardTheme: const CardThemeData(
         color: cardColor,
         elevation: 2,
         shape: RoundedRectangleBorder(
