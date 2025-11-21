@@ -660,26 +660,30 @@ class VitalsProvider with ChangeNotifier {
         case MetricType.weight:
           value = record.weightKg;
           if (value != null) {
-            debugPrint('[VitalsProvider] Weight extraction: $value kg from ${record.timestamp}');
+            debugPrint(
+                '[VitalsProvider] Weight extraction: $value kg from ${record.timestamp}');
           }
           break;
         case MetricType.bloodPressure:
           // Use systolic as the primary BP value for charting
           value = record.systolic?.toDouble();
           if (value != null) {
-            debugPrint('[VitalsProvider] BP extraction: ${record.systolic}/${record.diastolic} from ${record.timestamp}');
+            debugPrint(
+                '[VitalsProvider] BP extraction: ${record.systolic}/${record.diastolic} from ${record.timestamp}');
           }
           break;
         case MetricType.heartRate:
           value = record.heartRate?.toDouble();
           if (value != null) {
-            debugPrint('[VitalsProvider] HR extraction: $value bpm from ${record.timestamp}');
+            debugPrint(
+                '[VitalsProvider] HR extraction: $value bpm from ${record.timestamp}');
           }
           break;
         case MetricType.sugar:
           value = record.bloodSugar?.toDouble();
           if (value != null) {
-            debugPrint('[VitalsProvider] Blood Sugar extraction: $value mg/dL from ${record.timestamp}');
+            debugPrint(
+                '[VitalsProvider] Blood Sugar extraction: $value mg/dL from ${record.timestamp}');
           }
           break;
       }
@@ -695,11 +699,13 @@ class VitalsProvider with ChangeNotifier {
   /// Get the current value for the selected metric
   double? getCurrentValue() {
     if (_chartData.isEmpty) {
-      debugPrint('[VitalsProvider] No chart data for ${_selectedMetric.displayName} - returning null');
+      debugPrint(
+          '[VitalsProvider] No chart data for ${_selectedMetric.displayName} - returning null');
       return null;
     }
     final value = _chartData.last.value;
-    debugPrint('[VitalsProvider] Current value for ${_selectedMetric.displayName}: $value');
+    debugPrint(
+        '[VitalsProvider] Current value for ${_selectedMetric.displayName}: $value');
     return value;
   }
 

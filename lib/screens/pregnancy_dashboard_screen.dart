@@ -136,68 +136,82 @@ class _PregnancyDashboardScreenState extends State<PregnancyDashboardScreen> {
             ),
             SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
             LayoutBuilder(
-          builder: (context, vitalConstraints) {
-            // Calculate responsive card height based on screen
-            final cardHeight = ResponsiveHelper.isMobile(context) ? 180.0 : 220.0;
-            final spacing = ResponsiveHelper.getItemSpacing(context);
+              builder: (context, vitalConstraints) {
+                // Calculate responsive card height based on screen
+                final cardHeight =
+                    ResponsiveHelper.isMobile(context) ? 180.0 : 220.0;
+                final spacing = ResponsiveHelper.getItemSpacing(context);
 
-            // On large screens or when width allows, show cards side by side
-            if (isLargeScreen || vitalConstraints.maxWidth > 400) {
-              return SizedBox(
-                height: cardHeight,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: VitalCard(
-                        iconPath: 'assets/images/blood_pressure.png',
-                        value: '$bpValue mmHg',
-                        label: 'Blood Pressure',
-                        gradientColors: const [Color(0xFFE3F2FD), Color(0xFF90CAF9)],
-                        onTap: () => _navigateToVitalDetail('blood_pressure'),
-                      ),
-                    ),
-                    SizedBox(width: spacing),
-                    Expanded(
-                      child: VitalCard(
-                        iconPath: 'assets/images/heart_rate.png',
-                        value: '$hrValue bpm',
-                        label: 'Heart Rate',
-                        gradientColors: const [Color(0xFFFCE4EC), Color(0xFFF8BBD0)],
-                        onTap: () => _navigateToVitalDetail('heart_rate'),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              // On smaller screens, stack vertically
-              return Column(
-                children: [
-                  SizedBox(
+                // On large screens or when width allows, show cards side by side
+                if (isLargeScreen || vitalConstraints.maxWidth > 400) {
+                  return SizedBox(
                     height: cardHeight,
-                    child: VitalCard(
-                        iconPath: 'assets/images/blood_pressure.png',
-                        value: '$bpValue mmHg',
-                        label: 'Blood Pressure',
-                        gradientColors: const [Color(0xFFE3F2FD), Color(0xFF90CAF9)],
-                      onTap: () => _navigateToVitalDetail('blood_pressure'),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: VitalCard(
+                            iconPath: 'assets/images/blood_pressure.png',
+                            value: '$bpValue mmHg',
+                            label: 'Blood Pressure',
+                            gradientColors: const [
+                              Color(0xFFE3F2FD),
+                              Color(0xFF90CAF9)
+                            ],
+                            onTap: () =>
+                                _navigateToVitalDetail('blood_pressure'),
+                          ),
+                        ),
+                        SizedBox(width: spacing),
+                        Expanded(
+                          child: VitalCard(
+                            iconPath: 'assets/images/heart_rate.png',
+                            value: '$hrValue bpm',
+                            label: 'Heart Rate',
+                            gradientColors: const [
+                              Color(0xFFFCE4EC),
+                              Color(0xFFF8BBD0)
+                            ],
+                            onTap: () => _navigateToVitalDetail('heart_rate'),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: spacing),
-                  SizedBox(
-                    height: cardHeight,
-                    child: VitalCard(
-                        iconPath: 'assets/images/heart_rate.png',
-                        value: '$hrValue bpm',
-                        label: 'Heart Rate',
-                        gradientColors: const [Color(0xFFFCE4EC), Color(0xFFF8BBD0)],
-                      onTap: () => _navigateToVitalDetail('heart_rate'),
-                    ),
-                  ),
-                ],
-              );
-            }
-          },
+                  );
+                } else {
+                  // On smaller screens, stack vertically
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: cardHeight,
+                        child: VitalCard(
+                          iconPath: 'assets/images/blood_pressure.png',
+                          value: '$bpValue mmHg',
+                          label: 'Blood Pressure',
+                          gradientColors: const [
+                            Color(0xFFE3F2FD),
+                            Color(0xFF90CAF9)
+                          ],
+                          onTap: () => _navigateToVitalDetail('blood_pressure'),
+                        ),
+                      ),
+                      SizedBox(height: spacing),
+                      SizedBox(
+                        height: cardHeight,
+                        child: VitalCard(
+                          iconPath: 'assets/images/heart_rate.png',
+                          value: '$hrValue bpm',
+                          label: 'Heart Rate',
+                          gradientColors: const [
+                            Color(0xFFFCE4EC),
+                            Color(0xFFF8BBD0)
+                          ],
+                          onTap: () => _navigateToVitalDetail('heart_rate'),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
             ),
           ],
         );
@@ -228,22 +242,22 @@ class _PregnancyDashboardScreenState extends State<PregnancyDashboardScreen> {
             ),
             SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
             ...provider.alerts.asMap().entries.map((entry) {
-            final index = entry.key;
-            final alert = entry.value;
+              final index = entry.key;
+              final alert = entry.value;
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: AlertCard(
-                title: alert.title,
-                headline: alert.headline,
-                message: alert.message,
-                imagePath: alert.imagePath,
-                hasAction: alert.hasAction,
-                onActionPressed: () => _handleContactDoctor(),
-                onDismiss: () => provider.removeAlert(index),
-              ),
-            );
-          }),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: AlertCard(
+                  title: alert.title,
+                  headline: alert.headline,
+                  message: alert.message,
+                  imagePath: alert.imagePath,
+                  hasAction: alert.hasAction,
+                  onActionPressed: () => _handleContactDoctor(),
+                  onDismiss: () => provider.removeAlert(index),
+                ),
+              );
+            }),
           ],
         );
       },
@@ -265,11 +279,11 @@ class _PregnancyDashboardScreenState extends State<PregnancyDashboardScreen> {
         ),
         SizedBox(height: ResponsiveHelper.getItemSpacing(context)),
         const DailyTipCard(
-      title: 'Nutrition Tip',
-      content:
-          'Stay hydrated throughout the day. Aim for 8-10 glasses of water daily. '
-          'Proper hydration supports healthy blood flow and can help prevent common pregnancy discomforts.',
-      imagePath: 'assets/images/nutrition_tip.png',
+          title: 'Nutrition Tip',
+          content:
+              'Stay hydrated throughout the day. Aim for 8-10 glasses of water daily. '
+              'Proper hydration supports healthy blood flow and can help prevent common pregnancy discomforts.',
+          imagePath: 'assets/images/nutrition_tip.png',
         ),
       ],
     );

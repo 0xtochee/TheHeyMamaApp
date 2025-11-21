@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
 import '../constants/ui_constants.dart';
-import '../widgets/rounded_text_field.dart';
 import '../providers/vitals_provider.dart';
 import '../services/local_db.dart';
+import '../widgets/rounded_text_field.dart';
 
 /// Add Vitals Screen
 ///
@@ -67,7 +68,8 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
     // Initialize with provided values or defaults
     final initial = widget.initialValues;
     _weight = initial?.weightKg ?? VitalLimits.weightDefault;
-    _heartRate = initial?.heartRate?.toDouble() ?? VitalLimits.heartRateDefault.toDouble();
+    _heartRate = initial?.heartRate?.toDouble() ??
+        VitalLimits.heartRateDefault.toDouble();
     _selectedDateTime = initial?.timestamp ?? DateTime.now();
 
     // Initialize controllers
@@ -137,7 +139,8 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
           _weight = lastWeight;
           _weightController.text = _weight.round().toString();
         });
-        debugPrint('[AddVitalsScreen] Pre-filled weight with last value: $lastWeight kg');
+        debugPrint(
+            '[AddVitalsScreen] Pre-filled weight with last value: $lastWeight kg');
       }
     }
   }
@@ -156,7 +159,10 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
   /// Handle weight text field changes (update slider)
   void _onWeightTextChanged() {
     final value = double.tryParse(_weightController.text);
-    if (value != null && value != _weight && value >= VitalLimits.weightMin && value <= VitalLimits.weightMax) {
+    if (value != null &&
+        value != _weight &&
+        value >= VitalLimits.weightMin &&
+        value <= VitalLimits.weightMax) {
       setState(() => _weight = value);
     }
   }
@@ -164,7 +170,10 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
   /// Handle heart rate text field changes (update slider)
   void _onHeartRateTextChanged() {
     final value = double.tryParse(_heartRateController.text);
-    if (value != null && value != _heartRate && value >= VitalLimits.heartRateMin && value <= VitalLimits.heartRateMax) {
+    if (value != null &&
+        value != _heartRate &&
+        value >= VitalLimits.heartRateMin &&
+        value <= VitalLimits.heartRateMax) {
       setState(() => _heartRate = value);
     }
   }
@@ -200,7 +209,8 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
           _selectedDateTime.hour,
           _selectedDateTime.minute,
         );
-        _dateController.text = DateFormat('MMM dd, yyyy').format(_selectedDateTime);
+        _dateController.text =
+            DateFormat('MMM dd, yyyy').format(_selectedDateTime);
       });
     }
   }
@@ -294,8 +304,8 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
       if (success) {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
+          const SnackBar(
+            content: Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 12),
@@ -303,7 +313,7 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
               ],
             ),
             backgroundColor: AppColors.successGreen,
-            duration: const Duration(seconds: 2),
+            duration: Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -443,7 +453,7 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Weight',
           style: AppTextStyles.heading3,
         ),
@@ -475,7 +485,8 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
           child: Slider(
             min: VitalLimits.weightMin,
             max: VitalLimits.weightMax,
-            divisions: ((VitalLimits.weightMax - VitalLimits.weightMin) * 2).round(),
+            divisions:
+                ((VitalLimits.weightMax - VitalLimits.weightMin) * 2).round(),
             value: _weight.clamp(VitalLimits.weightMin, VitalLimits.weightMax),
             label: '${_weight.toStringAsFixed(1)} kg',
             onChanged: (value) {
@@ -502,7 +513,7 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
       children: [
         Row(
           children: [
-            Text(
+            const Text(
               'Blood Pressure',
               style: AppTextStyles.heading3,
             ),
@@ -600,7 +611,7 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
       children: [
         Row(
           children: [
-            Text(
+            const Text(
               'Heart Rate',
               style: AppTextStyles.heading3,
             ),
@@ -691,7 +702,7 @@ class _AddVitalsScreenState extends State<AddVitalsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Date & Time',
           style: AppTextStyles.heading3,
         ),
